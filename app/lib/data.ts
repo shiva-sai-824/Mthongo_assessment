@@ -1,7 +1,11 @@
 import rawData from '@/data/all_subjects_chapter_data.json';
 import { Chapter, ProcessedChapter, Subject } from '@/app/types';
 
-const ICON_NAMES: string[] = [ "Atom", "Flask", "FunctionSquare", "Book", "Calculator", "Lightbulb", "TestTube", "Brain", "ChartLine", "Ruler", "Compass", "Target", "RocketLaunch", "Gear", "Circuitry", "Magnet", "WaveSine", "Thermometer", "Infinity", "Sigma", "Pi", "NumberSquareOne", "NumberSquareTwo", "Planet", "Robot", "FirstAidKit" ];
+const ICON_NAMES: string[] = [
+    "Atom", "Flask", "FunctionSquare", "Book", "Calculator", "Lightbulb", "TestTube", "Brain",
+    "ChartLine", "Ruler", "Compass", "Target", "RocketLaunch", "Gear", "Circuitry", "Magnet",
+    "WaveSine", "Thermometer", "Infinity", "Sigma", "Pi", "NumberSquareOne", "NumberSquareTwo"
+];
 
 function getDeterministicIconName(chapterName: string): string {
     let hash = 0;
@@ -17,6 +21,7 @@ const chapters: ProcessedChapter[] = (rawData as Chapter[]).map((chapter, index)
   const years = Object.keys(chapter.yearWiseQuestionCount).map(Number).filter(y => !isNaN(y));
   const totalQuestions = Object.values(chapter.yearWiseQuestionCount).reduce((sum, count) => sum + count, 0);
   const progress = totalQuestions > 0 ? Math.round((chapter.questionSolved / totalQuestions) * 100) : 0;
+
   return {
     ...chapter,
     id: `${chapter.subject}-${index}`,
@@ -31,8 +36,15 @@ export const getChaptersData = (): ProcessedChapter[] => chapters;
 
 export const getFilterOptions = (subject: Subject) => {
   const subjectChapters = chapters.filter(c => c.subject === subject);
-  const classes = [...new Set(subjectChapters.map(c => c.class))].sort();
-  const units = [...new Set(subjectChapters.map(c => c.unit))].sort();
+
+  // BEFORE (fails on build): const classes = [...new Set(subjectChapters.map(c => c.class))].sort();
+  // AFTER (works everywhere): Use Array.from() which is universally supported.
+  const classes = Array.from(new Set(subjectChapters.map(c => c.class))).sort();
+
+  // BEFORE (fails on build): const units = [...new Set(subjectChapters.map(c => c.unit))].sort();
+  // AFTER (works everywhere): Use Array.from() for this one too.
+  const units = Array.from(new Set(subjectChapters.map(c => c.unit))).sort();
+  
   return { classes, units };
 };
 
